@@ -21,14 +21,8 @@ const Player = (name) => {
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
 
-        move: () => {x += 10},
-        on_turn_start: () => {
-            r = 15;
-            console.log(`Hi, I'm ${name}`);
-        },
-        on_turn_end: () => {
-            r = 6;
-        }
+        on_turn_start: () => {r = 15},
+        on_turn_end: () => {r = 6},
     }
 }
 
@@ -56,8 +50,9 @@ const Game = (render, num_players) => {
             players[turn_idx].lose_life();
             players[turn_idx].on_turn_end();
             delay(300).then(() => {
-                render.redraw(players);
+                console.log('log')
             });
+            render.redraw(players);
 
             // update turn index
             turn_idx = (turn_idx + 1) % players.length;
@@ -108,8 +103,7 @@ const Render = () => {
                 )
             });
 
-            // not sure why this needs to be here
-            // but otherwise redraw needs to be called twice
+            // draw them for the first time
             d3.select('svg').selectAll('circle')
                 .data(() => players)
                 .enter().append('circle')
@@ -148,3 +142,8 @@ const setup = (num_players) => {
 
 let game = setup(10);
 
+
+
+katex.render("c = \\pm\\sqrt{a^2 + b^2}", d3.select('#katex-demo').node(), {
+    throwOnError: false
+});

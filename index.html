@@ -2,25 +2,34 @@
 <html>
 
   <head>
-		<meta charset='utf-8'>
-		<meta name='viewport' content='width=device-width'>
-		<title>Mia</title>
-	</head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width'>
+    <title>Mia</title>
+
+    <!-- D3 and KaTeX imports -->
+    <link rel="stylesheet" href="katex/katex.min.css">
+    <script src="katex/katex.min.js"></script>
+    <script src="katex/contrib/auto-render.min.js"></script>
+    <script src="d3.min.js"></script>
+  </head>
 
   <body>
-		<header id=header>
-			<button id=setup>Setup</button>
-			<button id=step>Step</button>
-		</header>
 
-		<div id=main-div>
-			<svg></svg>
-		</div>
+    <!-- Header stuff -->
+    <header id=header>
+      <button id=setup>Setup</button>
+      <button id=step>Step</button>
+    </header>
 
-		<script src="Website/d3.min.js"></script>
-		<script src="Website/Mia.js"></script>
-	</body>
+    <!-- D3 playground -->
+    <div id=main-div>
+      <span id=katex-demo>LaTeX demo not loading...</span>
+      <svg></svg>
+    </div>
+
+    <!-- Main script execution -->
+    <script src="Mia.js"></script>
+
+  </body>
 
 </html>
-
-
