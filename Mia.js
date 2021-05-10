@@ -50,9 +50,8 @@ const Game = (render, num_players) => {
             players[turn_idx].lose_life();
             players[turn_idx].on_turn_end();
             delay(300).then(() => {
-                console.log('log')
+                render.redraw(players);
             });
-            render.redraw(players);
 
             // update turn index
             turn_idx = (turn_idx + 1) % players.length;
