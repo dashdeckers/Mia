@@ -13,22 +13,23 @@
     <script src="d3.min.js"></script>
   </head>
 
-  <body>
+  <body id=body>
 
     <!-- Header stuff -->
     <header id=header>
       <button id=setup>Setup</button>
       <button id=step>Step</button>
+      <span id=katex-demo>LaTeX demo not loading...</span>
     </header>
 
     <!-- D3 playground -->
     <div id=main-div>
-      <span id=katex-demo>LaTeX demo not loading...</span>
-      <svg></svg>
+      <svg id=main-svg></svg>
     </div>
 
     <!-- Main script execution -->
     <script src="Mia.js"></script>
+    <script src="Content.js"></script>
 
   </body>
 

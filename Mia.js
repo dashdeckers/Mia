@@ -1,5 +1,6 @@
 'use strict';
 
+
 const delay = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -71,7 +72,7 @@ const Render = () => {
     return {
         init_draw: (players, circle_size=100) => {
             // remove any old SVG elements
-            d3.select('svg').html(null);
+            d3.select('#main-svg').html(null);
 
             // style the basic HTML structure
             d3.select('#header')
@@ -84,11 +85,11 @@ const Render = () => {
                 .style('height', '90vh')
                 .style('background-color', color_palette.background);
 
-            d3.select('body')
+            d3.select('#body')
                 .style('margin', '0px')
                 .style('overflow', 'hidden');
 
-            d3.select('svg')
+            d3.select('#main-svg')
                 .attr("viewBox", "-300 -200 600 400")
                 .style('width', '100%')
                 .style('height', '100%');
@@ -103,7 +104,7 @@ const Render = () => {
             });
 
             // draw them for the first time
-            d3.select('svg').selectAll('circle')
+            d3.select('#main-svg').selectAll('circle')
                 .data(() => players)
                 .enter().append('circle')
                 .attr('fill', (p) => p.get_color())
@@ -113,7 +114,7 @@ const Render = () => {
         },
 
         redraw: (players) => {
-            let sprites = d3.select('svg').selectAll('circle')
+            let sprites = d3.select('#main-svg').selectAll('circle')
                 .data(() => players);
 
             sprites.exit().remove();
@@ -141,8 +142,3 @@ const setup = (num_players) => {
 
 let game = setup(10);
 
-
-
-katex.render("c = \\pm\\sqrt{a^2 + b^2}", d3.select('#katex-demo').node(), {
-    throwOnError: false
-});
