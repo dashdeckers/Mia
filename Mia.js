@@ -1,10 +1,5 @@
 'use strict';
 
-
-const delay = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 // dice roll function: returns a random integer in [1, 6]
 const roll_die = () => {
     return Math.floor(Math.random() * 6) + 1;
@@ -32,7 +27,8 @@ const Player = (name) => {
     return {
         get_lives: () => lives,
         get_name: () => name,
-        get_color: () => {return lives == 0 ? 'red': 'black'},
+        // players are red when they are dead, black otherwise
+        get_color: () => {return lives <= 0 ? 'red': 'black'},
         get_x: () => x,
         get_y: () => y,
 
@@ -83,7 +79,6 @@ const Render = () => {
         'background': '#999b84',
         'header': '#322f3d',
         'nodes': '#59405c',
-        'links': '#87556f',
     }
 
     return {
