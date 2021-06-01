@@ -10,6 +10,20 @@ const roll_die = () => {
     return Math.floor(Math.random() * 6) + 1;
 }
 
+// Two dice are rolled simultaneously:
+// The higher die is counted as the higher denomination.
+// Doubles are always higher than normal rolls.
+// The "Mia" (1 and 2) is a special roll and has the highest value.
+const value_order = [
+    // all double rolls have a probability of 1/36
+    // all other rolls have a probability of 2/36
+    31, 32,
+    41, 42, 43,
+    51, 52, 53, 54,
+    61, 62, 63, 64, 65,
+    11, 22, 33, 44, 55, 66,
+    12,
+]
 const Player = (name) => {
     let lives = 6;
     let x, y = 0;
