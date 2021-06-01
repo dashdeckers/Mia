@@ -1,6 +1,12 @@
 :root {
-  --color-bg: #999b84;
   --color-header: #322f3d;
+  --color-game-bg: #999b84;
+  --color-log-bg: #6f7061;
+}
+
+#body {
+  margin: 0px;
+  overflow: hidden;
 }
 
 #header {
@@ -12,12 +18,21 @@
 #main-div {
   width: 100vw;
   height: 90vh;
-  background-color: var(--color-bg);
+  overflow: hidden;
 }
 
-#body {
-  margin: 0px;
-  overflow: hidden;
+#game-column {
+  float: left;
+  width: 70%;
+  height: inherit;
+  background-color: var(--color-game-bg);
+}
+
+#log-column {
+  float: right;
+  width: 30%;
+  height: inherit;
+  background-color: var(--color-log-bg);
 }
 
 #main-svg {

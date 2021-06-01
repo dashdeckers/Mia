@@ -2,6 +2,7 @@
 <html>
 
   <head>
+
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width'>
     <title>Mia</title>
@@ -16,6 +17,7 @@
 
     <!-- D3 imports -->
     <script src="d3.min.js"></script>
+
   </head>
 
   <body id=body>
@@ -24,15 +26,20 @@
     <header id=header>
       <button id=setup>Setup</button>
       <button id=step>Step</button>
-      <span id=katex-demo>LaTeX demo not loading...</span>
     </header>
 
-    <!-- D3 playground -->
+    <!-- Game stuff -->
     <div id=main-div>
-      <svg id=main-svg viewBox="-300 -200 600 400"></svg>
+      <div id=game-column>
+        <svg id=main-svg viewBox="-300 -200 600 400"></svg>
+      </div>
+      <div id=log-column>
+        <p id=katex-demo>LaTeX demo not loading...</p>
+        <p id=log-text>Log text...</p>
+      </div>
     </div>
 
-    <!-- Main script execution -->
+    <!-- Javascript -->
     <script src="Mia.js"></script>
     <script src="Content.js"></script>
 

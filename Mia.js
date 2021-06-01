@@ -19,10 +19,11 @@ const value_order = [
     11, 22, 33, 44, 55, 66,
     12,
 ]
-const Player = (name) => {
-    let lives = 6;
-    let x, y = 0;
 
+
+const Player = (name) => {
+    let lives = 1;
+    let x, y = 0;
 
     return {
         get_lives: () => lives,
@@ -34,7 +35,6 @@ const Player = (name) => {
 
         // roll two dice and sort in decending order
         roll_dice: () => {return [roll_die(), roll_die()].sort((a, b) => b - a)},
-
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
     }
@@ -44,34 +44,41 @@ const Player = (name) => {
 const Game = (render, num_players) => {
     let turn_idx = 0;
     // names are IDs, so don't allow duplicate names.
-    let players = [
+    const players = [
         'Pheobe', 'Ross', 'Joey',
         'Rachel', 'Monica', 'Chandler',
         'Alice', 'Bob', 'Eve',
         'Jim', 'Dwight', 'Pam',
     // take num_players names from the list and turn them into Players
     ].slice(0, num_players).map((name) => {return Player(name)});
+    // log events as a list of strings
+    const logs = ['Game starts'];
 
     render.init_draw(players);
+    render.update_log(logs);
 
     return {
         get_players: () => players,
 
         play_turn: () => {
-            // show who's turn it is by turning green for a bit
-            d3.select(`#${players[turn_idx].get_name()}`)
-                .transition()
-                    .duration(500)
-                    .attr('fill', 'green')
-                .transition()
-                    .duration(1500)
-                    .attr('fill', players[turn_idx].get_color());
+            const p = players[turn_idx];
+            turn_idx = (turn_idx + 1) % players.length;
+
+            // break early if player is dead
+            if (p.get_lives() <= 0) {return};
 
             // do turn
-            players[turn_idx].lose_life();
+            logs.push(`${p.get_name()} rolled: ${p.roll_dice()}`);
 
-            // update turn index
-            turn_idx = (turn_idx + 1) % players.length;
+            p.lose_life();
+
+            if (p.get_lives() === 0) {
+                logs.push(`${p.get_name()} just died! :(`);
+            };
+
+            // update view
+            render.update_log(logs.join('\n'));
+            render.show_turn(p);
         },
     }
 }
@@ -101,6 +108,21 @@ const Render = () => {
                 .attr('cx', (p) => p.get_x())
                 .attr('cy', (p) => p.get_y())
                 .attr('r', player_size);
+        },
+
+        show_turn: (player) => {
+            // show who's turn it is by turning the player green for a bit
+            d3.select(`#${player.get_name()}`)
+                .transition()
+                    .duration(500)
+                    .attr('fill', 'green')
+                .transition()
+                    .duration(1500)
+                    .attr('fill', player.get_color());
+        },
+
+        update_log: (logs) => {
+            document.getElementById('log-text').innerText = logs;
         },
     }
 }
