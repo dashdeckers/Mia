@@ -9,7 +9,7 @@ const delay = (ms) => {
 const Player = (name) => {
     let lives = 6;
     let x, y = 0;
-    let r = 6;
+
 
     return {
         get_lives: () => lives,
@@ -17,13 +17,10 @@ const Player = (name) => {
         get_color: () => {return lives == 0 ? 'red': 'black'},
         get_x: () => x,
         get_y: () => y,
-        get_r: () => r,
+
 
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
-
-        on_turn_start: () => {r = 15},
-        on_turn_end: () => {r = 6},
     }
 }
 
@@ -43,16 +40,17 @@ const Game = (render, num_players) => {
         get_players: () => players,
 
         play_turn: () => {
-            // do stuff
-            players[turn_idx].on_turn_start();
-            render.redraw(players);
+            // show who's turn it is by turning green for a bit
+            d3.select(`#${players[turn_idx].get_name()}`)
+                .transition()
+                    .duration(500)
+                    .attr('fill', 'green')
+                .transition()
+                    .duration(1500)
+                    .attr('fill', players[turn_idx].get_color());
 
-            // players[turn_idx].move();
+            // do turn
             players[turn_idx].lose_life();
-            players[turn_idx].on_turn_end();
-            delay(300).then(() => {
-                render.redraw(players);
-            });
 
             // update turn index
             turn_idx = (turn_idx + 1) % players.length;
@@ -70,7 +68,7 @@ const Render = () => {
     }
 
     return {
-        init_draw: (players, circle_size=100) => {
+        init_draw: (players, circle_size=100, player_size=6) => {
             // remove any old SVG elements
             d3.select('#main-svg').html(null);
 
@@ -103,29 +101,16 @@ const Render = () => {
                 )
             });
 
-            // draw them for the first time
+            // draw the players
             d3.select('#main-svg').selectAll('circle')
                 .data(() => players)
                 .enter().append('circle')
+                .attr('id', (p) => p.get_name())
                 .attr('fill', (p) => p.get_color())
                 .attr('cx', (p) => p.get_x())
                 .attr('cy', (p) => p.get_y())
-                .attr('r', (p) => p.get_r());
+                .attr('r', player_size);
         },
-
-        redraw: (players) => {
-            let sprites = d3.select('#main-svg').selectAll('circle')
-                .data(() => players);
-
-            sprites.exit().remove();
-            sprites.enter().append('circle');
-            sprites.transition()
-                .duration(500)
-                .attr('fill', (p) => p.get_color())
-                .attr('cx', (p) => p.get_x())
-                .attr('cy', (p) => p.get_y())
-                .attr('r', (p) => p.get_r());
-        }
     }
 }
 
