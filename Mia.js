@@ -5,6 +5,10 @@ const delay = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// dice roll function: returns a random integer in [1, 6]
+const roll_die = () => {
+    return Math.floor(Math.random() * 6) + 1;
+}
 
 const Player = (name) => {
     let lives = 6;
@@ -18,6 +22,7 @@ const Player = (name) => {
         get_x: () => x,
         get_y: () => y,
 
+        roll_dice: () => {return [roll_die(), roll_die()].sort((a, b) => b - a)},
 
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
