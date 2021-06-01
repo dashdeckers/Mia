@@ -78,36 +78,10 @@ const Game = (render, num_players) => {
 
 
 const Render = () => {
-    let color_palette = {
-        'background': '#999b84',
-        'header': '#322f3d',
-        'nodes': '#59405c',
-    }
-
     return {
         init_draw: (players, circle_size=100, player_size=6) => {
             // remove any old SVG elements
             d3.select('#main-svg').html(null);
-
-            // style the basic HTML structure
-            d3.select('#header')
-                .style('width', '100vw')
-                .style('height', '10vh')
-                .style('background-color', color_palette.header);
-
-            d3.select('#main-div')
-                .style('width', '100vw')
-                .style('height', '90vh')
-                .style('background-color', color_palette.background);
-
-            d3.select('#body')
-                .style('margin', '0px')
-                .style('overflow', 'hidden');
-
-            d3.select('#main-svg')
-                .attr("viewBox", "-300 -200 600 400")
-                .style('width', '100%')
-                .style('height', '100%');
 
             // arange players positions around a circle
             let angle = (2 * Math.PI) / players.length;
