@@ -32,6 +32,7 @@ const Player = (name) => {
         get_x: () => x,
         get_y: () => y,
 
+        // roll two dice and sort in decending order
         roll_dice: () => {return [roll_die(), roll_die()].sort((a, b) => b - a)},
 
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0},
@@ -42,11 +43,13 @@ const Player = (name) => {
 
 const Game = (render, num_players) => {
     let turn_idx = 0;
+    // names are IDs, so don't allow duplicate names.
     let players = [
         'Pheobe', 'Ross', 'Joey',
         'Rachel', 'Monica', 'Chandler',
         'Alice', 'Bob', 'Eve',
         'Jim', 'Dwight', 'Pam',
+    // take num_players names from the list and turn them into Players
     ].slice(0, num_players).map((name) => {return Player(name)});
 
     render.init_draw(players);
