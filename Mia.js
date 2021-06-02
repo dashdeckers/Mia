@@ -165,6 +165,7 @@ const Game = (render, logs, num_players) => {
 
             // roll the dice
             else if (announcement === null || Math.random() < 0.5) {
+                if (!(announcement === null)) logs.push(`${curr_p.get_name()} believes ${prev_p.get_name()}!`);
 
                 const curr_roll = dice.roll_dice();
                 logs.push(`${curr_p.get_name()} rolled: ${curr_roll}`);
