@@ -116,7 +116,6 @@ const Game = (render, num_players) => {
         let offset = backwards ? 0 : 1;
         while (true) {
             let idx = mod(turn_idx + (offset * sign_modifier), players.length);
-            console.log(sign_modifier, offset, turn_idx, idx);
             if (!players[idx].is_dead()) {
                 return players[idx];
             }
