@@ -1,10 +1,6 @@
 'use strict';
 
 
-// log human readable events as a list of strings
-const logs = ['Game starts'];
-
-
 const Dice = () => {
     // Two dice are rolled simultaneously:
     // The higher die is counted as the higher denomination.
@@ -75,20 +71,14 @@ const Player = (name) => {
         get_x: () => x,
         get_y: () => y,
 
-        // lose a life and log if it resulted in death
-        lose_life: () => {
-            lives > 0 ? lives -= 1 : lives = 0;
-            if (lives === 0) {
-                logs.push(`${name} just died! :(`);
-            }
-        },
+        lose_life: () => {lives > 0 ? lives -= 1 : lives = 0;},
         is_dead: () => {return lives === 0},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
     }
 }
 
 
-const Game = (render, num_players) => {
+const Game = (render, logs, num_players) => {
     // remember the previously announced roll, the true roll, and who's turn it is now
     let announcement = null;
     let true_roll = null;
@@ -155,15 +145,18 @@ const Game = (render, num_players) => {
                         logs.push(`${curr_p.get_name()} didn't believe the Mia: loses 2 lives`);
                         curr_p.lose_life();
                         curr_p.lose_life();
+                        if (curr_p.is_dead()) logs.push(`${curr_p.get_name()} just died! :(`);
                     } else {
                         logs.push(`${curr_p.get_name()} didn't believe the Mia: ${prev_p.get_name()} loses a life`);
                         prev_p.lose_life();
+                        if (prev_p.is_dead()) logs.push(`${prev_p.get_name()} just died! :(`);
                     }
 
                 // believe the Mia
                 } else {
                     logs.push(`${curr_p.get_name()} believes the Mia and loses a life`);
                     curr_p.lose_life();
+                    if (curr_p.is_dead()) logs.push(`${curr_p.get_name()} just died! :(`);
                 }
 
                 [announcement, true_roll] = [null, null];
@@ -219,9 +212,11 @@ const Game = (render, num_players) => {
                 if (announcement === true_roll) {
                     logs.push(`They were telling the truth.`);
                     curr_p.lose_life();
+                    if (curr_p.is_dead()) logs.push(`${curr_p.get_name()} just died! :(`);
                 } else {
                     logs.push(`They were indeed lying.`);
                     prev_p.lose_life();
+                    if (prev_p.is_dead()) logs.push(`${prev_p.get_name()} just died! :(`);
                 }
 
                 [announcement, true_roll] = [null, null];
@@ -291,8 +286,10 @@ const Render = () => {
 
 
 const setup = (num_players) => {
+    // log human readable events as a list of strings
+    const logs = ['Game starts'];
     const render = Render();
-    const game = Game(render, num_players);
+    const game = Game(render, logs, num_players);
 
     d3.select('#setup').on('click', () => setup(3));
     d3.select('#step').on('click', game.play_turn);
