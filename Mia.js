@@ -140,7 +140,7 @@ const Game = (render, num_players) => {
             turn_idx = players.indexOf(curr_p);
 
             // if there is only one player left alive, the game is over.
-            if (!curr_p || !prev_p) {
+            if (!curr_p || !prev_p || curr_p.get_name() === prev_p.get_name()) {
                 logs.push(`THE GAME IS OVER, PRESS SETUP TO RESTART`);
                 render.update_log(logs.join('\n'));
                 return;
