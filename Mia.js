@@ -1,7 +1,7 @@
 'use strict';
 
 
-const Render = () => {
+const Render = (logs, do_rendering) => {
     return {
         init_draw: (players, circle_size=100, player_size=6) => {
             // remove any old SVG elements
@@ -24,11 +24,16 @@ const Render = () => {
                 .attr('fill', (p) => p.get_color())
                 .attr('cx', (p) => p.get_x())
                 .attr('cy', (p) => p.get_y())
-                .attr('r', player_size);
+                .attr('r', player_size)
+                .append('title')
+                .text((p) => p.get_name() + ':\n' + logs.get_one_human_data(p.get_name()));
         },
 
         // show who's turn it is by turning the player green for a bit
+        // also update the tooltip
         show_turn: (player) => {
+            if (!do_rendering) return;
+
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(500)
@@ -36,19 +41,33 @@ const Render = () => {
                 .transition()
                     .duration(1500)
                     .attr('fill', player.get_color());
+
+            d3.select('#main-svg').selectAll('title')
+                .text((p) => p.get_name() + ':\n' + logs.get_one_human_data(p.get_name()));
         },
 
         // just update some players color without turning them green
         update_color: (player) => {
+            if (!do_rendering) return;
+
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(1500)
                     .attr('fill', player.get_color());
         },
 
-        // refresh (more like replace) the logs
-        update_log: (logs) => {
-            document.getElementById('log-text').innerText = logs;
+        // refresh (more like replace) the logs and data
+        update_log_and_data: (logs) => {
+            if (!do_rendering) return;
+
+            document.getElementById('log-text').innerText = logs.get_human_logs();
+            document.getElementById('data-text').innerText = logs.get_human_data();
+        },
+
+        // refresh (more like replace) the logs and data even if rendering is off
+        force_update_log_and_data: (logs) => {
+            document.getElementById('log-text').innerText = logs.get_human_logs();
+            document.getElementById('data-text').innerText = logs.get_human_data();
         },
     }
 }
@@ -112,13 +131,24 @@ const Dice = () => {
 }
 
 
-const Logs = (players) => {
-    // log human readable events as a list of strings
-    const logs = ['Game starts'];
-    const render = Render();
-
-    render.update_log(logs);
-    render.init_draw(players);
+const Logs = (player_names) => {
+    const init_logs = () => {
+        // log human readable events as a list of strings
+        const logs = ['Game starts'];
+        // log stats and data in an object: data.playername.statistic 
+        const data = {};
+        for (const name of player_names) {
+            data[name] = {
+                'successful_calls':   0,
+                'unsuccessful_calls': 0,
+                'successful_lies':    0,
+                'unsuccessful_lies':  0,
+                'game_wins':          0,
+            }
+        }
+        return [logs, data];
+    }
+    let [logs, data] = init_logs();
 
     //// helper functions:
     const check_death = (p) => {if (p.is_dead()) logs.push(`${p.get_name()} just died! :(`)}
@@ -128,17 +158,23 @@ const Logs = (players) => {
     }
 
     return {
+        reset_logs: () => {[logs, data] = init_logs()},
+
         // when a Mia has been announced:
         mia_and_dont_believe_false: (curr_p, prev_p) => {
             logs.push(`The Mia was announced!`);
             logs.push(`${curr_p.get_name()} didn't believe the Mia: loses 2 lives`);
             check_death(curr_p);
+            data[curr_p.get_name()].unsuccessful_calls += 1;
         },
 
         mia_and_dont_believe_true: (curr_p, prev_p) => {
             logs.push(`The Mia was announced!`);
             logs.push(`${curr_p.get_name()} didn't believe the Mia: ${prev_p.get_name()} loses a life`);
             check_death(prev_p);
+            data[curr_p.get_name()].successful_calls += 1;
+            data[prev_p.get_name()].successful_lies -= 1;
+            data[prev_p.get_name()].unsuccessful_lies += 1;
         },
 
         mia_and_believe: (curr_p, prev_p) => {
@@ -152,6 +188,7 @@ const Logs = (players) => {
         roll_and_lie: (curr_p, prev_p, announced_roll, announcement, true_roll) => {
             believe_and_roll(curr_p, prev_p, announcement, true_roll);
             logs.push(`${curr_p.get_name()} lies and announces: ${announced_roll}`);
+            data[curr_p.get_name()].successful_lies += 1;
         },
 
         roll_and_truth: (curr_p, prev_p, announcement, true_roll) => {
@@ -165,32 +202,40 @@ const Logs = (players) => {
             logs.push(`${curr_p.get_name()} calls out ${prev_p.get_name()}!`);
             logs.push(`They were telling the truth.`);
             check_death(curr_p);
+            data[curr_p.get_name()].unsuccessful_calls += 1;
         },
 
         call_out_and_true: (curr_p, prev_p) => {
             logs.push(`${curr_p.get_name()} calls out ${prev_p.get_name()}!`);
             logs.push(`They were indeed lying.`);
             check_death(prev_p);
+            data[curr_p.get_name()].successful_calls += 1;
+            data[prev_p.get_name()].successful_lies -= 1;
+            data[prev_p.get_name()].unsuccessful_lies += 1;
         },
 
 
-        // when the turn, the round, or the game is over:
+        // when the round or the game is over
         round_ended: () => {
             logs.push(`THE ROUND IS OVER`);
-        },
-
-        end_of_turn: (curr_p, prev_p) => {
-            render.update_log(logs.join('\n'));
-            render.show_turn(curr_p);
-            render.update_color(prev_p);
         },
 
         game_over: (curr_p, prev_p) => {
             let winner = curr_p || prev_p;
             logs.push(`THE GAME IS OVER, ${winner.get_name()} wins!`);
             logs.push(`PRESS SETUP TO RESTART`);
-            render.update_log(logs.join('\n'));
+            data[winner.get_name()].game_wins += 1;
         },
+
+
+        // getters
+        get_human_logs: () => logs.join('\n'),
+
+        get_data: () => data,
+        get_one_data: (pname) => data[pname],
+
+        get_human_data: () => JSON.stringify(data, null, 4),
+        get_one_human_data: (pname) => JSON.stringify(data[pname], null, 4),
     }
 }
 
@@ -202,44 +247,40 @@ const Player = (name) => {
     return {
         get_lives: () => lives,
         get_name: () => name,
-        get_color: () => {return lives === 0 ? 'red': 'black'},
+        get_color: () => lives === 0 ? 'red': 'black',
         get_x: () => x,
         get_y: () => y,
 
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0;},
-        is_dead: () => {return lives === 0},
+        is_dead: () => lives === 0,
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
 
         // right now the players are still random, strategies can be implemented here
-        wants_to_lie: () => {return Math.random() < 0.5},
-        believes: (announcement, prev_p) => {return Math.random() < 0.5},
+        wants_to_lie: (announcement) => Math.random() < 0.5,
+        believes: (announcement, prev_p) => Math.random() < 0.5,
     }
 }
 
 
-const Game = (num_players) => {
+const Game = (player_names, logs, do_rendering) => {
     // remember the previously announced roll, the true roll, and who's turn it is now
     let announcement = null;
     let true_roll = null;
     let turn_idx = 0;
+    let game_over = false;
 
-    // turn 'num_players' names from the list into Players
-    const players = [
-        // names are IDs, so don't allow duplicate names.
-        'Pheobe', 'Ross', 'Joey',
-        'Rachel', 'Monica', 'Chandler',
-        'Alice', 'Bob', 'Eve',
-        'Jim', 'Dwight', 'Pam',
-    ].slice(0, num_players).map((name) => {return Player(name)});
-
-    // grab some dice, and keep some logs
+    // grab some players, some dice, and render stuff
+    let players = player_names.map((name) => Player(name));
     const dice = Dice();
-    const logs = Logs(players);
+    const render = Render(logs, do_rendering);
+
+    render.update_log_and_data(logs);
+    render.init_draw(players);
 
 
     //// helper functions:
     // dumbass javascript cant properly do modulo on negative numbers
-    const mod = (n, m) => {return ((n % m) + m) % m};
+    const mod = (n, m) => ((n % m) + m) % m;
 
     // function to return the next or previous player that is still alive
     // if no one else is left alive, return false
@@ -259,6 +300,17 @@ const Game = (num_players) => {
     }
 
     return {
+        game_is_over: () => game_over,
+        get_players: () => players,
+
+        render: () => render.force_update_log_and_data(logs),
+        reset_game: () => {
+            announcement = null;
+            true_roll = null;
+            turn_idx = 0;
+            game_over = false;
+            players = player_names.map((name) => Player(name));
+        },
         play_turn: () => {
             // get the next and previous still alive players (the bool toggles direction)
             const curr_p = get_next_player_from(turn_idx, false);
@@ -267,6 +319,8 @@ const Game = (num_players) => {
 
             // if there is only one player left alive, the game is over.
             if (!curr_p || !prev_p || curr_p.get_name() === prev_p.get_name()) {
+                game_over = true;
+                render.update_log_and_data(logs);
                 logs.game_over(curr_p, prev_p);
                 return;
             }
@@ -306,7 +360,7 @@ const Game = (num_players) => {
                 const curr_roll = dice.roll_dice();
 
                 // lie
-                if (curr_p.wants_to_lie() || dice.lower_than(curr_roll, announcement)) {
+                if (curr_p.wants_to_lie(announcement) || dice.lower_than(curr_roll, announcement)) {
                     const announced_roll = dice.get_higher_roll_than(announcement);
                     logs.roll_and_lie(curr_p, prev_p, announced_roll, announcement, curr_roll);
                     [announcement, true_roll] = [announced_roll, curr_roll];
@@ -336,26 +390,62 @@ const Game = (num_players) => {
                 logs.round_ended();
             }
 
-            logs.end_of_turn(curr_p, prev_p);
+            // update view
+            render.update_log_and_data(logs);
+            render.show_turn(curr_p);
+            render.update_color(prev_p);
         },
     }
 }
 
 
-// call out threshold && lie prob gradient
-// logs + stats
-// tooltip
-// 
+// TODO:
+// call out threshold && lie prob gradient (general strategies)
 
 
-const setup = (num_players) => {
-    const game = Game(num_players);
+const Setup = (num_players) => {
+    // get 'num_players' names from the list
+    // names are IDs, so don't allow duplicate names.
+    const player_names = [
+        'Pheobe', 'Ross', 'Joey',
+        'Rachel', 'Monica', 'Chandler',
+        'Alice', 'Bob', 'Eve',
+        'Jim', 'Dwight', 'Pam',
+    ].slice(0, num_players)
 
-    d3.select('#setup').on('click', () => setup(3));
+    const play_n_games = (game, num_games=10) => {
+        let games_played = 0;
+
+        while (true) {
+            game.play_turn();
+
+            if (game.game_is_over()) {
+                game.reset_game();
+                games_played += 1;
+            }
+
+            if (games_played === num_games) break;
+        }
+    }
+
+    const logs = Logs(player_names);
+    const game = Game(player_names, logs, true)
+
+    d3.select('#setup').on('click', () => {
+        logs.reset_logs();
+        game.reset_game();
+        game.render();
+    });
     d3.select('#step').on('click', game.play_turn);
+    d3.select('#run').on('click', () => {
+        const game = Game(player_names, logs, false)
+        play_n_games(game, 10);
+        game.render();
+    })
 
-    return game;
+    return logs;
 }
 
-const game = setup(10);
+
+const logs = Setup(10);
 

@@ -23,15 +23,28 @@
 
 #game-column {
   float: left;
-  width: 60%;
+  width: 50%;
   height: inherit;
   background-color: var(--color-game-bg);
+}
+
+#data-column {
+  overflow-y: scroll;
+  direction: rtl;
+  float: left;
+  width: 20%;
+  height: inherit;
+  background-color: var(--color-log-bg);
+}
+
+#data-text {
+  direction: ltr;
 }
 
 #log-column {
   overflow-y: scroll;
   float: right;
-  width: 40%;
+  width: 30%;
   height: inherit;
   background-color: var(--color-log-bg);
 }
