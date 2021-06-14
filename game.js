@@ -1,6 +1,6 @@
 'use strict';
 
-const Game = (player_names, logs, do_rendering) => {
+const Game = (player_stats, logs, do_rendering) => {
     // remember the previously announced roll, the true roll, and who's turn it is now
     let announcement = null;
     let true_roll = null;
@@ -8,7 +8,7 @@ const Game = (player_names, logs, do_rendering) => {
     let game_over = false;
 
     // grab some players, some dice, and render stuff
-    let players = player_names.map((name) => Player(name));
+    let players = player_stats.map((player_stats) => Player(...player_stats));
     const dice = Dice();
     const render = Render(logs, do_rendering);
 
@@ -51,7 +51,7 @@ const Game = (player_names, logs, do_rendering) => {
             true_roll = null;
             turn_idx = 0;
             game_over = false;
-            players = player_names.map((name) => Player(name));
+            players = player_stats.map((player_stats) => Player(...player_stats));
         },
         play_turn: () => {
             if (game_over) return;
@@ -104,7 +104,7 @@ const Game = (player_names, logs, do_rendering) => {
 
                 // lie
                 if (curr_p.wants_to_lie(announcement) || dice.lower_than(curr_roll, announcement)) {
-                    const announced_roll = dice.get_higher_roll_than(announcement);
+                    const announced_roll = curr_p.lie_with(dice, announcement);
                     logs.roll_and_lie(curr_p, prev_p, announced_roll, announcement, curr_roll);
                     [announcement, true_roll] = [announced_roll, curr_roll];
 

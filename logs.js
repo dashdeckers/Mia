@@ -1,13 +1,14 @@
 'use strict';
 
-const Logs = (player_names) => {
+const Logs = (player_stats) => {
     const init_logs = () => {
         // log human readable events as a list of strings
         const logs = ['Game starts'];
         // log stats and data in an object: data.playername.statistic 
         const data = {};
-        for (const name of player_names) {
+        for (const [name, lying_prob] of player_stats) {
             data[name] = {
+                'lying probability':  lying_prob,
                 'successful_calls':   0,
                 'unsuccessful_calls': 0,
                 'successful_lies':    0,

@@ -20,9 +20,9 @@
 const Setup = (num_players) => {
     // get 'num_players' names from the list
     // names are IDs, so don't allow duplicate names.
-    const player_names = [
-        'Pheobe', 'Ross', 'Joey',
-        'Rachel', 'Monica', 'Chandler',
+    const player_stats = [
+        ['Joey', 0.8], ['Pheobe', 0.5], ['Ross', 0.2],
+        ['Rachel', 0.8], ['Monica', 0.5], ['Chandler', 0.2],
         // 'Alice', 'Bob', 'Eve',
         // 'Jim', 'Dwight', 'Pam',
     ].slice(0, num_players)
@@ -42,8 +42,8 @@ const Setup = (num_players) => {
         }
     }
 
-    const logs = Logs(player_names);
-    const game = Game(player_names, logs, true)
+    const logs = Logs(player_stats);
+    const game = Game(player_stats, logs, true)
 
     d3.select('#setup').on('click', () => {
         logs.reset_logs();
@@ -52,7 +52,7 @@ const Setup = (num_players) => {
     });
     d3.select('#step').on('click', game.play_turn);
     d3.select('#run').on('click', () => {
-        const game = Game(player_names, logs, false)
+        const game = Game(player_stats, logs, false)
         play_n_games(game, 6);
         game.render();
     })
