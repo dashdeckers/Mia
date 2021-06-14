@@ -304,6 +304,10 @@ const Game = (player_names, logs, do_rendering) => {
         get_players: () => players,
 
         render: () => render.force_update_log_and_data(logs),
+        rerender: () => {
+            render.init_draw(players);
+            render.force_update_log_and_data(logs);
+        },
         reset_game: () => {
             announcement = null;
             true_roll = null;
@@ -312,6 +316,7 @@ const Game = (player_names, logs, do_rendering) => {
             players = player_names.map((name) => Player(name));
         },
         play_turn: () => {
+            if (game_over) return;
             // get the next and previous still alive players (the bool toggles direction)
             const curr_p = get_next_player_from(turn_idx, false);
             const prev_p = get_next_player_from(turn_idx, true);
@@ -320,8 +325,8 @@ const Game = (player_names, logs, do_rendering) => {
             // if there is only one player left alive, the game is over.
             if (!curr_p || !prev_p || curr_p.get_name() === prev_p.get_name()) {
                 game_over = true;
-                render.update_log_and_data(logs);
                 logs.game_over(curr_p, prev_p);
+                render.update_log_and_data(logs);
                 return;
             }
 
@@ -400,7 +405,20 @@ const Game = (player_names, logs, do_rendering) => {
 
 
 // TODO:
-// call out threshold && lie prob gradient (general strategies)
+
+// players should have one of three lying probabilities [0.2, 0.5, 0.8]
+// players know that these three are possible amongst the other players
+// lying is announcing the result of a uniform sample of dice rolls higher than X
+
+// players use the evidence gained by playing the game to infer the other players lying prob
+// evidence is counts of catching players lying unecessarily or telling the truth
+
+// kripke models initially show for each player, three possible worlds for each other player
+// as the game progresses the kripke models should collapse as the probability that an agent
+//   has a certain lying probability goes below some threshold
+
+// e.g: of the 100 turns agent_i played, he was caught lying 70 times
+//   agent_{i+1} no longer considers it possible for agent_i to have a lying probability of 0.2
 
 
 const Setup = (num_players) => {
@@ -409,8 +427,8 @@ const Setup = (num_players) => {
     const player_names = [
         'Pheobe', 'Ross', 'Joey',
         'Rachel', 'Monica', 'Chandler',
-        'Alice', 'Bob', 'Eve',
-        'Jim', 'Dwight', 'Pam',
+        // 'Alice', 'Bob', 'Eve',
+        // 'Jim', 'Dwight', 'Pam',
     ].slice(0, num_players)
 
     const play_n_games = (game, num_games=10) => {
@@ -434,12 +452,12 @@ const Setup = (num_players) => {
     d3.select('#setup').on('click', () => {
         logs.reset_logs();
         game.reset_game();
-        game.render();
+        game.rerender();
     });
     d3.select('#step').on('click', game.play_turn);
     d3.select('#run').on('click', () => {
         const game = Game(player_names, logs, false)
-        play_n_games(game, 10);
+        play_n_games(game, 6);
         game.render();
     })
 
