@@ -4,7 +4,7 @@ const Game = (player_stats, logs, do_rendering) => {
     // remember the previously announced roll, the true roll, and who's turn it is now
     let announcement = null;
     let true_roll = null;
-    let turn_idx = 0;
+    let turn_idx = Math.floor(Math.random() * player_stats.length);
     let game_over = false;
 
     // grab some players, some dice, and render stuff
@@ -49,7 +49,7 @@ const Game = (player_stats, logs, do_rendering) => {
         reset_game: () => {
             announcement = null;
             true_roll = null;
-            turn_idx = 0;
+            turn_idx = Math.floor(Math.random() * player_stats.length);
             game_over = false;
             players = player_stats.map((player_stats) => Player(...player_stats));
         },
