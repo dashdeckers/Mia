@@ -29,7 +29,6 @@ const Render = (logs, do_rendering) => {
         },
 
         // show who's turn it is by turning the player green for a bit
-        // also update the tooltip
         show_turn: (player) => {
             if (!do_rendering) return;
 
@@ -40,7 +39,10 @@ const Render = (logs, do_rendering) => {
                 .transition()
                     .duration(1500)
                     .attr('fill', player.get_color());
+        },
 
+        // update the hover text for each player
+        update_tooltip: () => {
             d3.select('#main-svg').selectAll('title')
                 .text((p) => p.get_name() + ':\n' + logs.get_one_human_data(p.get_name()));
         },

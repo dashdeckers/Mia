@@ -45,6 +45,7 @@ const Game = (player_stats, logs, do_rendering) => {
         rerender: () => {
             render.init_draw(players);
             render.force_update_log_and_data(logs);
+            render.update_tooltip();
         },
         reset_game: () => {
             announcement = null;
@@ -65,6 +66,7 @@ const Game = (player_stats, logs, do_rendering) => {
                 game_over = true;
                 logs.game_over(curr_p, prev_p);
                 render.update_log_and_data(logs);
+                render.update_tooltip();
                 return;
             }
 
@@ -137,6 +139,8 @@ const Game = (player_stats, logs, do_rendering) => {
             render.update_log_and_data(logs);
             render.show_turn(curr_p);
             render.update_color(prev_p);
+            render.update_log_and_data(logs);
+            render.update_tooltip();
         },
     }
 }
