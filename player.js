@@ -1,7 +1,7 @@
 'use strict';
 
 const Player = (name, lying_prob) => {
-    let lives = 1;
+    let lives = 6;
     let x, y = 0;
 
     return {

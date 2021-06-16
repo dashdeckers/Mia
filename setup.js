@@ -53,7 +53,7 @@ const Setup = (num_players) => {
     d3.select('#step').on('click', game.play_turn);
     d3.select('#run').on('click', () => {
         const game = Game(player_stats, logs, false)
-        play_n_games(game, 6);
+        play_n_games(game, 10);
         game.render();
     })
 
@@ -61,4 +61,4 @@ const Setup = (num_players) => {
 }
 
 
-const logs = Setup(10);
+const logs = Setup(5);
