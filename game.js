@@ -1,14 +1,18 @@
 'use strict';
 
 const Game = (player_stats, logs, do_rendering) => {
+    const init_state = () => {
+        let announcement = null;
+        let prev_announc = null;
+        let true_roll = null;
+        let turn_idx = Math.floor(Math.random() * player_stats.length);
+        let game_over = false;
+        let players = player_stats.map((player_stats) => Player(...player_stats));
+        return [announcement, prev_announc, true_roll, turn_idx, game_over, players];
+    }
     // remember the previously announced roll, the true roll, and who's turn it is now
-    let announcement = null;
-    let true_roll = null;
-    let turn_idx = Math.floor(Math.random() * player_stats.length);
-    let game_over = false;
-
-    // grab some players, some dice, and render stuff
-    let players = player_stats.map((player_stats) => Player(...player_stats));
+    // the dice and renderer are constants, but the players can be reset
+    let [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
     const dice = Dice();
     const render = Render(logs, do_rendering);
 
@@ -47,12 +51,9 @@ const Game = (player_stats, logs, do_rendering) => {
             render.force_update_log_and_data(logs);
             render.update_tooltip();
         },
+
         reset_game: () => {
-            announcement = null;
-            true_roll = null;
-            turn_idx = Math.floor(Math.random() * player_stats.length);
-            game_over = false;
-            players = player_stats.map((player_stats) => Player(...player_stats));
+            [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
         },
         play_turn: () => {
             if (game_over) return;
@@ -74,7 +75,7 @@ const Game = (player_stats, logs, do_rendering) => {
             if (dice.is_mia(announcement)) {
 
                 // don't believe the Mia
-                if (curr_p.believes(announcement, prev_p)) {
+                if (curr_p.believes(logs.get_evidence_on(prev_p))) {
 
                     // it really was a Mia
                     if (dice.is_mia(true_roll)) {
@@ -85,7 +86,8 @@ const Game = (player_stats, logs, do_rendering) => {
                     // it was not a Mia
                     } else {
                         prev_p.lose_life();
-                        logs.mia_and_dont_believe_true(curr_p, prev_p);
+                        let necessary = dice.lower_than(true_roll, prev_announc) ? true : false;
+                        logs.mia_and_dont_believe_true(curr_p, prev_p, necessary);
                     }
 
                 // believe the Mia
@@ -94,12 +96,12 @@ const Game = (player_stats, logs, do_rendering) => {
                     logs.mia_and_believe(curr_p, prev_p);
                 }
 
-                [announcement, true_roll] = [null, null];
+                [announcement, prev_announc, true_roll] = [null, null];
                 logs.round_ended();
             }
 
             // believe the previous player
-            else if (announcement === null || curr_p.believes(announcement, prev_p)) {
+            else if (announcement === null || curr_p.believes(logs.get_evidence_on(prev_p))) {
 
                 // roll the dice
                 const curr_roll = dice.roll_dice();
@@ -108,12 +110,12 @@ const Game = (player_stats, logs, do_rendering) => {
                 if (curr_p.wants_to_lie(announcement) || dice.lower_than(curr_roll, announcement)) {
                     const announced_roll = curr_p.lie_with(dice, announcement);
                     logs.roll_and_lie(curr_p, prev_p, announced_roll, announcement, curr_roll);
-                    [announcement, true_roll] = [announced_roll, curr_roll];
+                    [announcement, prev_announc, true_roll] = [announced_roll, announcement, curr_roll];
 
                 // truth
                 } else {
                     logs.roll_and_truth(curr_p, prev_p, announcement, curr_roll);
-                    [announcement, true_roll] = [curr_roll, curr_roll];
+                    [announcement, prev_announc, true_roll] = [curr_roll, announcement, curr_roll];
 
                 }
 
@@ -128,15 +130,15 @@ const Game = (player_stats, logs, do_rendering) => {
                 // they were lying
                 } else {
                     prev_p.lose_life();
-                    logs.call_out_and_true(curr_p, prev_p);
+                    let necessary = dice.lower_than(true_roll, prev_announc) ? true : false;
+                    logs.call_out_and_true(curr_p, prev_p, necessary);
                 }
 
-                [announcement, true_roll] = [null, null];
+                [announcement, prev_announc, true_roll] = [null, null, null];
                 logs.round_ended();
             }
 
             // update view
-            render.update_log_and_data(logs);
             render.show_turn(curr_p);
             render.update_color(prev_p);
             render.update_log_and_data(logs);

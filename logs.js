@@ -4,16 +4,24 @@ const Logs = (player_stats) => {
     const init_logs = () => {
         // log human readable events as a list of strings
         const logs = ['Game starts'];
-        // log stats and data in an object: data.playername.statistic 
+        // log stats and data in an object: data.playername.statistic
         const data = {};
         for (const [name, lying_prob] of player_stats) {
             data[name] = {
-                'lying probability':  lying_prob,
-                'successful_calls':   0,
-                'unsuccessful_calls': 0,
-                'successful_lies':    0,
-                'unsuccessful_lies':  0,
+                'lying_probability':  lying_prob,
                 'game_wins':          0,
+                'public_lies':        0,
+                'public_truths':      0,
+                'K':                  {},
+            }
+            // K is the knowledge each agent has about each other agent
+            for (const [next_name, next_lying_prob] of player_stats) {
+                if (name === next_name) {continue};
+
+                data[name]['K'][next_name] = {
+                    'inference': 0.5,
+                    'truth': next_lying_prob,
+                }
             }
         }
         return [logs, data];
@@ -35,16 +43,16 @@ const Logs = (player_stats) => {
             logs.push(`The Mia was announced!`);
             logs.push(`${curr_p.get_name()} didn't believe the Mia: loses 2 lives`);
             check_death(curr_p);
-            data[curr_p.get_name()].unsuccessful_calls += 1;
+            data[prev_p.get_name()].public_truths++;
+            data[curr_p.get_name()]['K'][prev_p.get_name()]['inference'] = curr_p.get_inference()
         },
 
-        mia_and_dont_believe_true: (curr_p, prev_p) => {
+        mia_and_dont_believe_true: (curr_p, prev_p, necessary) => {
             logs.push(`The Mia was announced!`);
             logs.push(`${curr_p.get_name()} didn't believe the Mia: ${prev_p.get_name()} loses a life`);
             check_death(prev_p);
-            data[curr_p.get_name()].successful_calls += 1;
-            data[prev_p.get_name()].successful_lies -= 1;
-            data[prev_p.get_name()].unsuccessful_lies += 1;
+            if (!necessary) {data[prev_p.get_name()].public_lies++};
+            data[curr_p.get_name()]['K'][prev_p.get_name()]['inference'] = curr_p.get_inference()
         },
 
         mia_and_believe: (curr_p, prev_p) => {
@@ -58,7 +66,6 @@ const Logs = (player_stats) => {
         roll_and_lie: (curr_p, prev_p, announced_roll, announcement, true_roll) => {
             believe_and_roll(curr_p, prev_p, announcement, true_roll);
             logs.push(`${curr_p.get_name()} lies and announces: ${announced_roll}`);
-            data[curr_p.get_name()].successful_lies += 1;
         },
 
         roll_and_truth: (curr_p, prev_p, announcement, true_roll) => {
@@ -72,28 +79,28 @@ const Logs = (player_stats) => {
             logs.push(`${curr_p.get_name()} calls out ${prev_p.get_name()}!`);
             logs.push(`They were telling the truth.`);
             check_death(curr_p);
-            data[curr_p.get_name()].unsuccessful_calls += 1;
+            data[prev_p.get_name()].public_truths++;
+            data[curr_p.get_name()]['K'][prev_p.get_name()]['inference'] = curr_p.get_inference()
         },
 
-        call_out_and_true: (curr_p, prev_p) => {
+        call_out_and_true: (curr_p, prev_p, necessary) => {
             logs.push(`${curr_p.get_name()} calls out ${prev_p.get_name()}!`);
             logs.push(`They were indeed lying.`);
             check_death(prev_p);
-            data[curr_p.get_name()].successful_calls += 1;
-            data[prev_p.get_name()].successful_lies -= 1;
-            data[prev_p.get_name()].unsuccessful_lies += 1;
+            if (!necessary) {data[prev_p.get_name()].public_lies++};
+            data[curr_p.get_name()]['K'][prev_p.get_name()]['inference'] = curr_p.get_inference()
         },
 
 
         // when the round or the game is over
         round_ended: () => {
-            logs.push(`THE ROUND IS OVER`);
+            logs.push(`THE ROUND IS OVER\n`);
         },
 
         game_over: (curr_p, prev_p) => {
             let winner = curr_p || prev_p;
             logs.push(`THE GAME IS OVER, ${winner.get_name()} wins!`);
-            logs.push(`PRESS SETUP TO RESTART`);
+            logs.push(`PRESS SETUP TO RESTART\n\n`);
             data[winner.get_name()].game_wins += 1;
         },
 
@@ -106,5 +113,7 @@ const Logs = (player_stats) => {
 
         get_human_data: () => JSON.stringify(data, null, 4),
         get_one_human_data: (pname) => JSON.stringify(data[pname], null, 4),
+
+        get_evidence_on: (p) => (({public_lies, public_truths}) => ({public_lies, public_truths}))(data[p.get_name()])
     }
 }
