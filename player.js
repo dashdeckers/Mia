@@ -26,7 +26,7 @@ const Player = (name, lying_prob) => {
         lose_life: () => {lives > 0 ? lives -= 1 : lives = 0;},
         set_pos: (new_x, new_y) => {[x, y] = [new_x, new_y]},
 
-        wants_to_lie: (announcement) => Math.random() < lying_prob,
+        wants_to_lie: () => Math.random() < lying_prob,
         believes: (evidence) => {
             // infer most probable world from evidence, by default guess 0.5
             // evidence is the publicly known data on the relevant person

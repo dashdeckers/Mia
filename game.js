@@ -110,7 +110,7 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
                 const curr_roll = dice.roll_dice();
 
                 // lie
-                if (curr_p.wants_to_lie(announcement) || dice.lower_than(curr_roll, announcement)) {
+                if (curr_p.wants_to_lie() || dice.lower_than(curr_roll, announcement)) {
                     const announced_roll = curr_p.lie_with(dice, announcement);
                     logs.roll_and_lie(curr_p, prev_p, announced_roll, announcement, curr_roll);
                     [announcement, prev_announc, true_roll] = [announced_roll, announcement, curr_roll];
