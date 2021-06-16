@@ -1,6 +1,6 @@
 'use strict';
 
-const Game = (player_stats, logs, do_rendering) => {
+const Game = (player_stats, logs, do_rendering, use_AI) => {
     const init_state = () => {
         let announcement = null;
         let prev_announc = null;
@@ -10,8 +10,9 @@ const Game = (player_stats, logs, do_rendering) => {
         let players = player_stats.map((player_stats) => Player(...player_stats));
         return [announcement, prev_announc, true_roll, turn_idx, game_over, players];
     }
-    // remember the previously announced roll, the true roll, and who's turn it is now
-    // the dice and renderer are constants, but the players can be reset
+    // remember the previously announced roll, the true roll, and who's turn it is now.
+    // the dice and renderer are constants, but the players can be reset.
+    // use_AI allows players to make use of inference and kripke logic, otherwise random.
     let [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
     const dice = Dice();
     const render = Render(logs, do_rendering);
@@ -42,6 +43,7 @@ const Game = (player_stats, logs, do_rendering) => {
     }
 
     return {
+        game_uses_AI: () => use_AI,
         game_is_over: () => game_over,
         get_players: () => players,
 
@@ -52,6 +54,7 @@ const Game = (player_stats, logs, do_rendering) => {
             render.update_tooltip();
         },
 
+        toggle_AI: () => {use_AI = !use_AI; return use_AI},
         reset_game: () => {
             [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
         },
@@ -75,7 +78,7 @@ const Game = (player_stats, logs, do_rendering) => {
             if (dice.is_mia(announcement)) {
 
                 // don't believe the Mia
-                if (curr_p.believes(logs.get_evidence_on(prev_p))) {
+                if (curr_p.believes(use_AI ? logs.get_evidence_on(prev_p) : {})) {
 
                     // it really was a Mia
                     if (dice.is_mia(true_roll)) {
@@ -101,7 +104,7 @@ const Game = (player_stats, logs, do_rendering) => {
             }
 
             // believe the previous player
-            else if (announcement === null || curr_p.believes(logs.get_evidence_on(prev_p))) {
+            else if (announcement === null || curr_p.believes(use_AI ? logs.get_evidence_on(prev_p) : {})) {
 
                 // roll the dice
                 const curr_roll = dice.roll_dice();

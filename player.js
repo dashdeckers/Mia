@@ -43,7 +43,6 @@ const Player = (name, lying_prob) => {
             return Math.random() < probable_world;
         },
         lie_with: (dice, announcement) => {
-            // differentiate here between necessary lies and willful lies?
             return dice.get_higher_roll_than(announcement)
         },
     }

@@ -42,8 +42,10 @@ const Setup = (num_players) => {
         }
     }
 
+    let use_AI = true;
+
     const logs = Logs(player_stats);
-    const game = Game(player_stats, logs, true)
+    const game = Game(player_stats, logs, true, use_AI)
 
     d3.select('#setup').on('click', () => {
         logs.reset_logs();
@@ -52,13 +54,17 @@ const Setup = (num_players) => {
     });
     d3.select('#step').on('click', game.play_turn);
     d3.select('#run').on('click', () => {
-        const game = Game(player_stats, logs, false)
+        const game = Game(player_stats, logs, false, use_AI)
         play_n_games(game, 10);
         game.render();
+    })
+    d3.select('#AI').on('click', () => {
+        use_AI = game.toggle_AI();
+        document.getElementById('AI').innerText = `Toggle AI (${game.game_uses_AI()})`;
     })
 
     return logs;
 }
 
 
-const logs = Setup(5);
+const logs = Setup(6);
