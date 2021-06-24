@@ -1,25 +1,29 @@
 'use strict';
 
-const Game = (player_stats, logs, do_rendering, use_AI) => {
-    const init_state = () => {
-        let announcement = null;
-        let prev_announc = null;
-        let true_roll = null;
-        let turn_idx = Math.floor(Math.random() * player_stats.length);
-        let game_over = false;
-        let players = player_stats.map((player_stats) => Player(...player_stats));
-        return [announcement, prev_announc, true_roll, turn_idx, game_over, players];
-    }
-    // remember the previously announced roll, the true roll, and who's turn it is now.
-    // the dice and renderer are constants, but the players can be reset.
-    // use_AI allows players to make use of inference and kripke logic, otherwise random.
-    let [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
+const Game = (player_stats, logs, use_AI) => {
+    // remember the two previous announcements, the true roll, and who's turn it is now.
+    // game over, do rendering and do logging are booleans while the players, the dice
+    // and the renderer are larger objects.
     const dice = Dice();
     const render = Render(logs);
+    let do_rendering = true;
+    let do_logging = true;
+
+    const init_state = () => {
+        const announcement = null;
+        const prev_announc = null;
+        const true_roll = null;
+        const turn_idx = Math.floor(Math.random() * player_stats.length);
+        const game_over = false;
+        const players = player_stats.map((player_stats) => Player(...player_stats));
+
+        return [announcement, prev_announc, true_roll, turn_idx, game_over, players];
+    }
+    let [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
 
     render.init_draw(players);
     render.update_log_and_data(logs);
-
+    render.update_tooltip();
 
     //// helper functions:
     // dumbass javascript cant properly do modulo on negative numbers
@@ -47,8 +51,14 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
         game_is_over: () => game_over,
         get_players: () => players,
 
-        force_render: () => {
-            render.update_log_and_data(logs)
+        turn_off_rendering: () => render.turn_off_rendering(),
+        turn_on_rendering: () => render.turn_on_rendering(),
+        turn_off_logging: () => logs.turn_off_logging(),
+        turn_on_logging: () => logs.turn_on_logging(),
+        toggle_AI: () => {use_AI = !use_AI; return use_AI},
+
+        render: () => {
+            render.update_log_and_data(logs);
             render.update_tooltip();
         },
         init_render: () => {
@@ -57,9 +67,10 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
             render.update_tooltip();
         },
 
-        toggle_AI: () => {use_AI = !use_AI; return use_AI},
         reset_game: () => {
             [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
+            render.init_draw(players);
+            render.update_tooltip();
         },
         play_turn: () => {
             if (game_over) return;
@@ -72,10 +83,8 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
             if (!curr_p || !prev_p || curr_p.get_name() === prev_p.get_name()) {
                 game_over = true;
                 logs.game_over(curr_p, prev_p);
-                if (do_rendering) {
-                    render.update_log_and_data(logs);
-                    render.update_tooltip();
-                }
+                render.update_log_and_data(logs);
+                render.update_tooltip();
                 return;
             }
 
@@ -147,12 +156,10 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
             }
 
             // update view
-            if (do_rendering) {
-                render.show_turn(curr_p);
-                render.update_color(prev_p);
-                render.update_log_and_data(logs);
-                render.update_tooltip();
-            }
+            render.show_turn(curr_p);
+            render.update_color(prev_p);
+            render.update_log_and_data(logs);
+            render.update_tooltip();
         },
     }
 }

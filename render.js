@@ -1,7 +1,12 @@
 'use strict';
 
 const Render = (logs) => {
+    let do_rendering = true;
+
     return {
+        turn_on_rendering: () => do_rendering = true,
+        turn_off_rendering: () => do_rendering = false,
+
         init_draw: (players, circle_size=100, player_size=6) => {
             // remove any old SVG elements
             d3.select('#main-svg').html(null);
@@ -30,6 +35,8 @@ const Render = (logs) => {
 
         // show who's turn it is by turning the player green for a bit
         show_turn: (player) => {
+            if (!do_rendering) return;
+
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(500)
@@ -41,12 +48,16 @@ const Render = (logs) => {
 
         // update the hover text for each player
         update_tooltip: () => {
+            if (!do_rendering) return;
+
             d3.select('#main-svg').selectAll('title')
                 .text((p) => p.get_name() + ':\n' + logs.get_one_human_data(p.get_name()));
         },
 
         // just update some players color without turning them green
         update_color: (player) => {
+            if (!do_rendering) return;
+
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(1500)
@@ -55,6 +66,8 @@ const Render = (logs) => {
 
         // refresh (more like replace) the logs and data
         update_log_and_data: (logs) => {
+            if (!do_rendering) return;
+
             document.getElementById('log-text').innerText = logs.get_human_logs();
             document.getElementById('data-text').innerText = logs.get_human_data();
         },
