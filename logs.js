@@ -8,10 +8,10 @@ const Logs = (player_stats) => {
         const data = {};
         for (const [name, lying_prob] of player_stats) {
             data[name] = {
-                'lying_probability':  lying_prob,
                 'game_wins':          0,
                 'public_lies':        0,
                 'public_truths':      0,
+                'lying_probability':  lying_prob,
                 'K':                  {},
             }
             // K is the knowledge each agent has about each other agent

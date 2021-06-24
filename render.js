@@ -1,6 +1,6 @@
 'use strict';
 
-const Render = (logs, do_rendering) => {
+const Render = (logs) => {
     return {
         init_draw: (players, circle_size=100, player_size=6) => {
             // remove any old SVG elements
@@ -30,8 +30,6 @@ const Render = (logs, do_rendering) => {
 
         // show who's turn it is by turning the player green for a bit
         show_turn: (player) => {
-            if (!do_rendering) return;
-
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(500)
@@ -49,8 +47,6 @@ const Render = (logs, do_rendering) => {
 
         // just update some players color without turning them green
         update_color: (player) => {
-            if (!do_rendering) return;
-
             d3.select(`#${player.get_name()}`)
                 .transition()
                     .duration(1500)
@@ -59,14 +55,6 @@ const Render = (logs, do_rendering) => {
 
         // refresh (more like replace) the logs and data
         update_log_and_data: (logs) => {
-            if (!do_rendering) return;
-
-            document.getElementById('log-text').innerText = logs.get_human_logs();
-            document.getElementById('data-text').innerText = logs.get_human_data();
-        },
-
-        // refresh (more like replace) the logs and data even if rendering is off
-        force_update_log_and_data: (logs) => {
             document.getElementById('log-text').innerText = logs.get_human_logs();
             document.getElementById('data-text').innerText = logs.get_human_data();
         },

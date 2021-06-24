@@ -50,18 +50,18 @@ const Setup = (num_players) => {
     d3.select('#setup').on('click', () => {
         logs.reset_logs();
         game.reset_game();
-        game.rerender();
+        game.init_render();
     });
     d3.select('#step').on('click', game.play_turn);
     d3.select('#run10').on('click', () => {
         const game = Game(player_stats, logs, false, use_AI)
         play_n_games(game, 10);
-        game.render();
+        game.force_render();
     })
     d3.select('#run100').on('click', () => {
         const game = Game(player_stats, logs, false, use_AI)
         play_n_games(game, 100);
-        game.render();
+        game.force_render();
     })
     d3.select('#AI').on('click', () => {
         use_AI = game.toggle_AI();

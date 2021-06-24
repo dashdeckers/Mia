@@ -15,10 +15,10 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
     // use_AI allows players to make use of inference and kripke logic, otherwise random.
     let [announcement, prev_announc, true_roll, turn_idx, game_over, players] = init_state();
     const dice = Dice();
-    const render = Render(logs, do_rendering);
+    const render = Render(logs);
 
-    render.update_log_and_data(logs);
     render.init_draw(players);
+    render.update_log_and_data(logs);
 
 
     //// helper functions:
@@ -47,10 +47,13 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
         game_is_over: () => game_over,
         get_players: () => players,
 
-        render: () => render.force_update_log_and_data(logs),
-        rerender: () => {
+        force_render: () => {
+            render.update_log_and_data(logs)
+            render.update_tooltip();
+        },
+        init_render: () => {
             render.init_draw(players);
-            render.force_update_log_and_data(logs);
+            render.update_log_and_data(logs);
             render.update_tooltip();
         },
 
@@ -69,8 +72,10 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
             if (!curr_p || !prev_p || curr_p.get_name() === prev_p.get_name()) {
                 game_over = true;
                 logs.game_over(curr_p, prev_p);
-                render.update_log_and_data(logs);
-                render.update_tooltip();
+                if (do_rendering) {
+                    render.update_log_and_data(logs);
+                    render.update_tooltip();
+                }
                 return;
             }
 
@@ -142,10 +147,12 @@ const Game = (player_stats, logs, do_rendering, use_AI) => {
             }
 
             // update view
-            render.show_turn(curr_p);
-            render.update_color(prev_p);
-            render.update_log_and_data(logs);
-            render.update_tooltip();
+            if (do_rendering) {
+                render.show_turn(curr_p);
+                render.update_color(prev_p);
+                render.update_log_and_data(logs);
+                render.update_tooltip();
+            }
         },
     }
 }
