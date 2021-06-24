@@ -15,6 +15,10 @@
   background-color: var(--color-header);
 }
 
+#report {
+    float: right;
+}
+
 #main-div {
   width: 100vw;
   height: 90vh;

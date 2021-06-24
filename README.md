@@ -1,7 +1,9 @@
 # Mia, the lying dice game.
 Modeling the dice game Mia (also called Mäxchen) with a Kripke model.
 
-This is a simulation of the game Mia (or Mäxchen) with, optionally, somewhat artificially intelligent players. When the AI toggle is turned off, players are random and have a 50% chance of calling out the previous player. Otherwise, they base their decision off of the history of the game and what they have observed. See below for a description of the how the game is played.
+This is a simulation of the game Mia with, optionally, somewhat artificially intelligent players. When the AI toggle is turned off, players are random and have a 50% chance of calling out the previous player. Otherwise, they base their decision off of the history of the game and what they have observed. See below for a description of the how the game is played and how it is implemented.
+
+Please find the actual simulation hosted on the associated [GitHub Pages website](https://dashdeckers.github.io/Mia/), and the report hosted [in this repository](https://github.com/dashdeckers/Mia/blob/main/report.pdf) (also accessible via the GitHub Pages link).
 
 ## How to play the game
 
@@ -18,12 +20,10 @@ The goal of the game is not to figure out or guess the exact value of the dice p
 
 This can get very (infinitely?) complex to model in higher-order knowledge logic and so while the game itself is simulated accurately, the players have been simplified to reduce complexity. For one, players have a fixed lying probability of either 0.2, 0.5 or 0.8 and this is common knowledge. We also only model the player behavior as trying to infer the other players lying probability based on observed lies / truths and then adjusting their calling-out probability to be equal to the most likely lying probability of the other player.
 
-For details of how this fits into the Kripke logic framework please refer to the report included in this repository.
+For details of how this fits into the Kripke logic framework please refer to the report included [in this repository](https://github.com/dashdeckers/Mia/blob/main/report.pdf).
 
 
 ## Details of the simulation
-Please find the actual simulation hosted on the associated GitHub Pages website.
-
 There are 5 buttons on the top left to interact with the game.
 - Setup resets the game completely to its initial values
 - Step plays a single turn, and shows both in the logs and the dots what is happening
